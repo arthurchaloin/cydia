@@ -116,6 +116,8 @@ extern "C" {
 #include "Cydia/MIMEAddress.h"
 #include "Cydia/LoadingViewController.h"
 #include "Cydia/ProgressEvent.h"
+
+#include "system.h"
 /* }}} */
 
 /* Profiler {{{ */
@@ -3905,7 +3907,7 @@ class CydiaLogCleaner :
 - (void) configure {
     NSString *dpkg = [NSString stringWithFormat:@"/usr/libexec/cydo --configure -a --status-fd %u", statusfd_];
     _trace();
-    system([dpkg UTF8String]);
+    __system__([dpkg UTF8String]);
     _trace();
 }
 
@@ -4020,7 +4022,7 @@ class CydiaLogCleaner :
 
     struct stat info;
     if (stat([nextended UTF8String], &info) != -1 && (info.st_mode & S_IFMT) == S_IFREG)
-        system([[NSString stringWithFormat:@"/usr/libexec/cydia/cydo /bin/cp --remove-destination %@ %@", ShellEscape(nextended), ShellEscape(oextended)] UTF8String]);
+        __system__([[NSString stringWithFormat:@"/usr/libexec/cydia/cydo /bin/cp --remove-destination %@ %@", ShellEscape(nextended), ShellEscape(oextended)] UTF8String]);
 
     unlink([nextended UTF8String]);
     symlink([oextended UTF8String], [nextended UTF8String]);
@@ -4530,7 +4532,7 @@ class CydiaLogCleaner :
 - (void) _setupMail:(MFMailComposeViewController *)controller {
     [controller addAttachmentData:[NSData dataWithContentsOfFile:@"/tmp/cydia.log"] mimeType:@"text/plain" fileName:@"cydia.log"];
 
-    system("/usr/bin/dpkg -l >/tmp/dpkgl.log");
+    __system__("/usr/bin/dpkg -l >/tmp/dpkgl.log");
     [controller addAttachmentData:[NSData dataWithContentsOfFile:@"/tmp/dpkgl.log"] mimeType:@"text/plain" fileName:@"dpkgl.log"];
 }
 
@@ -8236,11 +8238,11 @@ static void HomeControllerReachabilityCallback(SCNetworkReachabilityRef reachabi
 
 - (void) reloadSpringBoard {
     if (kCFCoreFoundationVersionNumber >= 700) // XXX: iOS 6.x
-        system("/usr/libexec/cydia/cydo /bin/launchctl stop com.apple.backboardd");
+        __system__("/usr/libexec/cydia/cydo /bin/launchctl stop com.apple.backboardd");
     else
-        system("/usr/libexec/cydia/cydo /bin/launchctl stop com.apple.SpringBoard");
+        __system__("/usr/libexec/cydia/cydo /bin/launchctl stop com.apple.SpringBoard");
     sleep(15);
-    system("/usr/bin/killall backboardd SpringBoard");
+    __system__("/usr/bin/killall backboardd SpringBoard");
 }
 
 - (void) _saveConfig {
@@ -8528,7 +8530,7 @@ _end
 
 - (void) _uicache {
     _trace();
-    system("/usr/bin/uicache");
+    __system__("/usr/bin/uicache");
     _trace();
 }
 
@@ -8583,7 +8585,7 @@ _end
                 for (Package *broken in (id) broken_) {
                     [broken remove];
                     NSString *id(ShellEscape([broken id]));
-                    system([[NSString stringWithFormat:@"/usr/libexec/cydia/cydo /bin/rm -f"
+                    __system__([[NSString stringWithFormat:@"/usr/libexec/cydia/cydo /bin/rm -f"
                         " /var/lib/dpkg/info/%@.prerm"
                         " /var/lib/dpkg/info/%@.postrm"
                         " /var/lib/dpkg/info/%@.preinst"
@@ -8624,7 +8626,7 @@ _end
     NSAutoreleasePool *pool([[NSAutoreleasePool alloc] init]);
 
     _trace();
-    system([command UTF8String]);
+    __system__([command UTF8String]);
     _trace();
 
     [pool release];
@@ -9404,19 +9406,19 @@ int main(int argc, char *argv[]) {
     broken = nil;
 
     SaveConfig(nil);
-    system("/usr/libexec/cydia/cydo /bin/rm -f /var/lib/cydia/metadata.plist");
+    __system__("/usr/libexec/cydia/cydo /bin/rm -f /var/lib/cydia/metadata.plist");
     /* }}} */
 
     Finishes_ = [NSArray arrayWithObjects:@"return", @"reopen", @"restart", @"reload", @"reboot", nil];
 
     if (kCFCoreFoundationVersionNumber > 1000)
-        system("/usr/libexec/cydia/cydo /usr/libexec/cydia/setnsfpn /var/lib");
+        __system__("/usr/libexec/cydia/cydo /usr/libexec/cydia/setnsfpn /var/lib");
 
     int version([[NSString stringWithContentsOfFile:@"/var/lib/cydia/firmware.ver"] intValue]);
 
     if (access("/User", F_OK) != 0 || version != 6) {
         _trace();
-        system("/usr/libexec/cydia/cydo /usr/libexec/cydia/firmware.sh");
+        __system__("/usr/libexec/cydia/cydo /usr/libexec/cydia/firmware.sh");
         _trace();
     }
 
@@ -9427,11 +9429,11 @@ int main(int argc, char *argv[]) {
             _assert(errno == ENOENT);
     }
 
-    system("/usr/libexec/cydia/cydo /bin/ln -sf /var/mobile/Library/Caches/com.saurik.Cydia/sources.list /etc/apt/sources.list.d/cydia.list");
+    __system__("/usr/libexec/cydia/cydo /bin/ln -sf /var/mobile/Library/Caches/com.saurik.Cydia/sources.list /etc/apt/sources.list.d/cydia.list");
 
     /* APT Initialization {{{ */
-    _assert(pkgInitConfig(*_config));
-    _assert(pkgInitSystem(*_config, _system));
+    assert(pkgInitConfig(*_config));
+    assert(pkgInitSystem(*_config, _system));
 
     _config->Set("Acquire::AllowInsecureRepositories", true);
     _config->Set("Acquire::Check-Valid-Until", false);
