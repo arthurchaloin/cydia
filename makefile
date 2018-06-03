@@ -115,7 +115,7 @@ cycc += -arch armv6
 cycc += -Xarch_armv6 -miphoneos-version-min=2.0
 flag += -Xarch_armv6 -marm # @synchronized
 flag += -Xarch_armv6 -mcpu=arm1176jzf-s
-flag += -mllvm -arm-reserve-r9
+flag += -ffixed-r9
 link += -Xarch_armv6 -Wl,-lgcc_s.1
 
 plus += -std=c++11
